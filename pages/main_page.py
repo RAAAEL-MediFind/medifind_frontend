@@ -4,12 +4,8 @@ from components.footer import show_footer
 import requests
 
 
-@ui.page("/")
-def show_home_page():
+@ui.page("/main_page")
+def show_main_page():
     show_navbar()
-    ui.label("this is the home page")
+    ui.label("this is the main page")
     show_footer()
-
-
-
-    
