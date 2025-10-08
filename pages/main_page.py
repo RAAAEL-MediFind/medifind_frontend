@@ -67,11 +67,11 @@ def show_main_page():
         "display: flex; top: 0; z-index: 100;"
     ):
         ui.image("assets/medilogo.png").classes(
-            "items-center ml-[400px] w-[250px] h-[100px] mt-0 "
+            "items-center w-[250px] h-[100px] mt-0 "
         )
 
-        ui.button("PURCHASE THEME").classes(
-            "text-white text-bold items-end ml-[600px]"
+        ui.button("PURCHASE ITEM").classes(
+            "text-white text-bold items-end ml-[800px]"
         ).style(
             "border-radius: 25px; padding: 0.6rem 1.5rem;   cursor: pointer; transition: 0.3s ease;"
         ).props(
@@ -80,9 +80,11 @@ def show_main_page():
 
     with ui.grid(columns=2).classes():
         with ui.column().classes().style("padding: 8rem 6rem 5rem 6rem; z-index: 10;"):
-            ui.label("Professional Medicine Shop & A Cluster of Pharmacies").classes(
+
+            ui.label("Because the right Care shouldn't be hard to find").classes(
                 "hero-title"
             )
+
             ui.image("assets/h1-slider04 (1).png").classes("w-[200px]")
 
         with ui.row().style("display: flex; align-items: flex-end; gap: 2rem;"):
@@ -106,4 +108,18 @@ def show_main_page():
             "top:70%; left:80%; animation-delay:6s; opacity: 0.8; animation: floatLeaf 10s linear infinite;"
         )
 
+    # --- START CARD SECTION ---
+    # White background and dark text applied via style()
+    with ui.grid(columns=3).classes("w-screen h-full p-10").style(
+        "background-color: white; color: #333;"
+    ):
+        for i in range(3):
+            with ui.card().classes("w-[20rem] h-[15rem]"):
+                ui.link(
+                    "visit pharmacy home page",
+                    "http://127.0.0.1:8080/home",
+                    new_tab=True,
+                )
+
+        ui.label("Pharmacy name").classes("text-bold text-2xl")
     show_footer()
