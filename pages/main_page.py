@@ -1,102 +1,100 @@
 from nicegui import ui, app
-from components.footer import show_footer
 import requests
+
+# Define the gradient and white styles once for consistency
+GRADIENT_STYLE = "background: linear-gradient(180deg, #00a7b1, #02c3b8);"
+WHITE_SECTION_STYLE = "background-color: white; color: #333;"
+
+PHARMACIES = [
+    {"name": "MediCare", "link_name": "medicare"},
+    {"name": "Wellness Rx", "link_name": "wellness_rx"},
+    {"name": "Local Drug Mart", "link_name": "local_drug_mart"},
+]
 
 
 @ui.page("/")
 def show_main_page():
+
     ui.add_head_html(
         """
     <style>
-    body {
-    margin: 0;
-    background: linear-gradient(180deg, #00a7b1, #02c3b8);
-    font-family: 'Poppins', sans-serif;
-    color: white;
-    overflow-x: hidden;
-    }
-
-    .hero-title {
-    font-size: 3rem;
-    font-weight: 700;
-    line-height: 1.3;
-    margin-bottom: 2rem;
-    }
-
+    /* Keyframes MUST be here */
     @keyframes floatLeaf {
-    0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
-    50% { transform: translateY(-30px) rotate(45deg); opacity: 1; }
-    100% { transform: translateY(0) rotate(90deg); opacity: 0.8; }
+        0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+        50% { transform: translateY(-30px) rotate(45deg); opacity: 1; }
+        100% { transform: translateY(0) rotate(90deg); opacity: 0.8; }
     }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-    .hero-section {
-        padding: 7rem 2rem;
-    }
-    .hero-title {
-        font-size: 2.2rem;
-    }
-    .device-container {
-        flex-direction: column;
-        align-items: center;
-    }
-    .device-img {
-        width: 90%;
-    }
-    .device-img-small {
-        width: 120px;
-    }
+    /* Device transition style */
+    .device-transition {
+        transition: transform 0.4s ease;
     }
     </style>
-
     <script>
+    /* JavaScript for mouse tracking MUST be here */
     document.addEventListener("mousemove", (e) => {
-    document.querySelectorAll(".device-img, .device-img-small").forEach((el) => {
-        const speed = 0.05;
-        const x = (window.innerWidth - e.pageX * speed) / 100;
-        const y = (window.innerHeight - e.pageY * speed) / 100;
-        el.style.transform = `translate(${x}px, ${y}px)`;
-    });
+        document.querySelectorAll(".device-img, .device-img-small").forEach((el) => {
+            const speed = 0.05;
+            const x = (window.innerWidth - e.pageX * speed) / 100;
+            const y = (window.innerHeight - e.pageY * speed) / 100;
+            el.style.transform = `translate(${x}px, ${y}px)`;
+        });
     });
     </script>
     """
     )
 
-    with ui.header().classes("items-center bg-transparent fixed w-[100%]").style(
-        "display: flex; top: 0; z-index: 100;"
-    ):
-        ui.image("assets/medilogo.png").classes(
-            "items-center w-[250px] h-[100px] mt-0 "
-        )
+    with ui.column().classes("w-screen relative pt-24").style(GRADIENT_STYLE):
 
-        ui.button("PURCHASE ITEM").classes(
-            "text-white text-bold items-end ml-[800px]"
-        ).style(
-            "border-radius: 25px; padding: 0.6rem 1.5rem;   cursor: pointer; transition: 0.3s ease;"
-        ).props(
-            "color=#11cdef"
-        )
-
-    with ui.grid(columns=2).classes():
-        with ui.column().classes().style("padding: 8rem 6rem 5rem 6rem; z-index: 10;"):
-
-            ui.label("Because the right Care shouldn't be hard to find").classes(
-                "hero-title"
+        with ui.row().classes("items-center w-full -mt-20").style(
+            f"display: flex; top: 0; z-index: 100; {GRADIENT_STYLE}"
+        ):
+            ui.image("assets/medilogo.png").classes(
+                "items-center w-[150px] md:w-[250px] h-[75px] md:h-[100px] mt-0 "
             )
 
-            ui.image("assets/h1-slider04 (1).png").classes("w-[200px]")
-
-        with ui.row().style("display: flex; align-items: flex-end; gap: 2rem;"):
-            ui.image("assets/ldp-laptop.png").classes(
-                "w-[500px] border-rounded ml-60"
-            ).style("transition: transform 0.4s ease;")
-            ui.image("assets/ldp-tablet-02 (1).png").classes(
-                "w-[300px] mr-40 -mt-20"
-            ).style("transition: transform 0.4s ease;")
-            ui.image("assets/ldp-phone-02.png").classes("w-[300px] ml-80 -mt-80").style(
-                " transition: transform 0.4s ease;"
+            ui.button("PURCHASE ITEM").classes(
+                "text-white text-bold items-end md:block md:ml-[800px]"
+            ).style(
+                "border-radius: 25px; padding: 0.6rem 1.5rem; cursor: pointer; transition: 0.3s ease;"
+            ).props(
+                "color=#11cdef"
             )
+
+        # GRID: Mobile: 1 column, Desktop: 2 columns
+        with ui.grid().classes("w-full grid-cols-1 md:grid-cols-2"):
+
+            # TEXT COLUMN: Responsive padding and text alignment
+            with ui.column().classes(
+                " items-center px-4 md:px-24 pb-12 md:pb-20 text-center md:text-left z-10 mt-40"
+            ):
+
+                # TITLE: Responsive font size
+                ui.label("Because the right Care shouldn't be hard to find").classes(
+                    "font-extrabold leading-tight mb-8 text-3xl md:text-[3rem] text-white"
+                )
+                ui.image("assets/h1-slider04 (1).png").classes(
+                    "w-[200px] mx-auto md:mx-0"
+                )
+
+            # DEVICES ROW: Mobile: stacked, centered; Desktop: row, custom positions
+            with ui.row().classes(
+                "w-full flex flex-col md:flex-row items-center md:items-end justify-center gap-4 md:gap-8"
+            ):
+
+                # Device 1: Laptop (Responsive width and position)
+                ui.image("assets/ldp-laptop.png").classes(
+                    "w-4/5 md:w-[500px] border-rounded device-img device-transition md:ml-60"
+                )
+
+                # Device 2: Tablet (Responsive width and position)
+                ui.image("assets/ldp-tablet-02 (1).png").classes(
+                    "w-3/5 md:w-[300px] device-img-small device-transition md:mr-40 md:-mt-20"
+                )
+
+                # Device 3: Phone (Responsive width and position)
+                ui.image("assets/ldp-phone-02.png").classes(
+                    "w-3/5 md:w-[300px] device-img-small device-transition md:ml-80 md:-mt-80"
+                )
 
         ui.image("assets/ldp-leaf-03 (1).png").classes("absolute w-[40px]").style(
             "top:20%; left:10%; animation-delay:2s; opacity: 0.8; animation: floatLeaf 10s linear infinite;"
@@ -108,18 +106,21 @@ def show_main_page():
             "top:70%; left:80%; animation-delay:6s; opacity: 0.8; animation: floatLeaf 10s linear infinite;"
         )
 
-    # --- START CARD SECTION ---
-    # White background and dark text applied via style()
-    with ui.grid(columns=3).classes("w-screen h-full p-10").style(
-        "background-color: white; color: #333;"
-    ):
-        for i in range(3):
-            with ui.card().classes("w-[20rem] h-[15rem]"):
-                ui.link(
-                    "visit pharmacy home page",
-                    "http://127.0.0.1:8080/home",
-                    new_tab=True,
-                )
+    with ui.grid().classes(
+        "w-full p-10 justify-items-center grid-cols-1 md:grid-cols-3"
+    ).style(WHITE_SECTION_STYLE):
+        for pharmacy in PHARMACIES:
 
-        ui.label("Pharmacy name").classes("text-bold text-2xl")
-    show_footer()
+            with ui.card().classes(
+                "w-11/12 md:w-[20rem] h-[15rem] shadow-xl hover:shadow-2xl transition duration-300"
+            ):
+                ui.link(
+                    f"Visit {pharmacy['name']} Home Page",
+                    f"/pharmacy/{pharmacy['link_name']}",
+                    new_tab=False,
+                ).classes("text-lg text-primary")
+
+                ui.label(pharmacy["name"]).classes("text-bold text-3xl mt-4")
+                ui.label(
+                    "Click to view shop, available medicines, and contact."
+                ).classes("text-sm text-gray-500")
