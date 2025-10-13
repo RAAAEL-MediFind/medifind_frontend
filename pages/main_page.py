@@ -1,6 +1,8 @@
 from nicegui import ui, app
 import requests
 
+from pages.shop import shop_page
+
 # Define the gradient and white styles once for consistency
 GRADIENT_STYLE = "background: linear-gradient(180deg, #00a7b1, #02c3b8);"
 WHITE_SECTION_STYLE = "background-color: white; color: #333;"
