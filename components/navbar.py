@@ -10,7 +10,7 @@ def show_navbar():
                 # Replace with an actual image link if you have one
                 ui.label("MediFind").classes("text-4xl font-bold text-white-400")
 
-                ui.link("Home", target="/home").classes(
+                ui.link("Home", target="/pharmacy/{name}").classes(
                     "text-white font-semibold p-2 no-underline ml-20"
                 )
                 ui.link("Shop +", target="/shop").classes(

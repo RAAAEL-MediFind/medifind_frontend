@@ -114,7 +114,7 @@ def show_main_page():
         for pharmacy in PHARMACIES:
 
             with ui.card().classes(
-                "w-11/12 md:w-[20rem] h-[15rem] shadow-xl hover:shadow-2xl transition duration-300"
+                "w-11/12 md:w-[20rem] h-[15rem] shadow-xl hover:shadow-2xl transition duration-300 rounded"
             ):
                 ui.link(
                     f"Visit {pharmacy['name']} Home Page",
@@ -122,7 +122,6 @@ def show_main_page():
                     new_tab=False,
                 ).classes("text-lg text-primary")
 
+                ui.image("assets/landing_home11.jpg")
+
                 ui.label(pharmacy["name"]).classes("text-bold text-3xl mt-4")
-                ui.label(
-                    "Click to view shop, available medicines, and contact."
-                ).classes("text-sm text-gray-500")

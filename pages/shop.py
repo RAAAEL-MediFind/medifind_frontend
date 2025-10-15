@@ -1,4 +1,7 @@
 from nicegui import ui
+from components.navbar import show_navbar
+from components.footer import show_footer
+from components.sidebar import show_sidebar
 
 
 def product_card(image, title, categories, old_price, new_price=None, discount=None):
@@ -8,7 +11,9 @@ def product_card(image, title, categories, old_price, new_price=None, discount=N
         ):
             # Product Image & Discount Badge
             with ui.row().classes("relative justify-center"):
-                ui.image(image).classes("h-48 w-auto rounded-xl object-contain")
+                ui.image("assets/pexels-shvetsa-3683088.jpg").classes(
+                    "h-48 w-auto rounded-xl object-contain"
+                )
 
             # Product Info
             with ui.column().classes("mt-3 text-center"):
@@ -44,16 +49,18 @@ def product_card(image, title, categories, old_price, new_price=None, discount=N
 
 @ui.page("/shop")
 def shop_page():
-    with ui.column().style(" background-color: #f0f7fa;").classes("ml-60 bg-cover"):
+    show_navbar()
+    show_sidebar()
+    with ui.column().style(" background-color: #f0f7fa;").classes("bg-cover"):
         with ui.column():
             ui.label("Shop Products").classes(
-                "text-3xl font-bold text-center mt-6 mb-4"
+                "text-3xl font-bold text-center mt-20 mb-4"
             )
 
         # Products Grid
         with ui.row().classes("justify-center flex-wrap gap-6 mb-10"):
             product_card(
-                image="https://via.placeholder.com/150",
+                image="assets/pexels-tima-miroshnichenko-7033798.jpg",
                 title="Online Only Triple Oxygen",
                 categories="Covid Essentials, Health Conditions, Treatments",
                 old_price="193.38",
@@ -62,7 +69,7 @@ def shop_page():
             )
 
             product_card(
-                image="https://via.placeholder.com/150",
+                image="assets/pexels-shvetsa-3683088.jpg",
                 title="Oral Irrigator Electric",
                 categories="Health Conditions, OTC Deals, Treatments",
                 old_price="173.68",
@@ -92,3 +99,4 @@ def shop_page():
                 categories="Diabetes, Fitness, Health Conditions",
                 old_price="124.98",
             )
+    show_footer()
