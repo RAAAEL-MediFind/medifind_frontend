@@ -1,45 +1,54 @@
 from nicegui import ui
 
+
 def show_navbar():
-    """
-    A modern and responsive navigation bar component for NiceGUI.
-    """
-    # Use a header or element for semantic HTML and full width
-    with ui.header().classes('bg-blue-600 text-white shadow-lg h-16'):
-        # Flex container for layout: space-between distributes items
-        with ui.element('div').classes("flex justify-between items-center w-full h-full px-4 sm:px-8"):
+    with ui.header().classes("bg-[#34989e] text-white p-0 h-8"):
 
-            # 1. Left: Clickable Logo/Brand
-            with ui.row().classes("items-center"):
-                with ui.link("/"):
-                    # Use a clean icon and text as a robust placeholder for the logo
-                    ui.image("assets/signuplog.png").classes("h-10 w-auto object-contain cursor-pointer") 
+        with ui.row().classes("w-full bg-[#34989e] items-center p-6"):
 
-                    
+            with ui.row().classes("p-2 "):
+                # Replace with an actual image link if you have one
+                ui.label("MediFind").classes("text-4xl font-bold text-white-400")
 
-
-            # 2. Center: Navigation Links (Desktop/Tablet Only)
-            with ui.row().classes("hidden md:flex gap-8"):
-                for label, link in [
-                    ("Home", "/"),
-                    ("Find Medicine", "/find"),
-                    ("Upload Prescription", "/upload"),
-                    ("My Orders", "/orders"),
-                    ("Contact", "/contact"),
-                ]:
-                    ui.link(label, link).classes(
-                        "text-base font-medium hover:text-blue-200 transition-colors duration-200 py-1"
-                    ).props('flat') # Add a 'flat' prop if this were a button, but for links, it's clean.
-
-            # 3. Right: User Actions (Icons and Button)
-            with ui.row().classes("items-center gap-4"):
-                # Notifications Icon
-                ui.icon("notifications_none").classes(
-                    "text-2xl cursor-pointer hover:text-blue-200 transition-colors duration-200"
+                ui.link("Home", target="/home").classes(
+                    "text-white font-semibold p-2 no-underline ml-20"
                 )
-                
-                # Dashboard Button
-                ui.button("Dashboard", on_click=lambda: ui.open("/userdashboard")).classes(
-                    "bg-blue-800 text-white font-semibold text-sm px-4 py-1.5 rounded-full shadow-md "
-                    "hover:bg-blue-700 transition-colors duration-200"
+                ui.link("Shop +", target="/shop").classes(
+                    "text-white font-semibold p-2 no-underline ml-20"
                 )
+
+                ui.link("Contact", target="/contact").classes(
+                    "text-white font-semibold p-2 no-underline ml-20"
+                )
+
+            with ui.row().classes("items-center text-white gap-4 ml-60"):
+                ui.link("SIGN IN ", target="/signin").classes(
+                    "text-white font-semibold no-underline"
+                )
+                ui.link("SIGN UP", target="/signup").classes(
+                    "text-white font-semibold no-underline"
+                )
+                # Wishlist Icon
+                ui.icon("favorite_border", size="md").classes(
+                    "hover:text-red-400 cursor-pointer"
+                )
+
+                # Shopping Cart (with badge)
+                with ui.row().classes("items-center"):
+                    ui.icon("shopping_cart", size="md").classes("cursor-pointer")
+
+            # --- 3. BOTTOM BAR (Navigation) ---
+            # Using a simple row for the main navigation links
+
+            # Dashboard Button
+            ui.button(
+                "Dashboard", on_click=lambda: ui.navigate("/userdashboard")
+            ).classes(
+                "bg-blue-800 text-white font-semibold text-sm px-4 py-1.5 rounded-full shadow-md "
+                "hover:bg-blue-700 transition-colors duration-200"
+            )
+
+    # Setting the theme color for the rest of the application to match the header
+    ui.add_head_html("<style>body { background-color: white; }</style>")
+
+    # 3. Right: User Actions (Icons and Button)
