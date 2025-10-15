@@ -8,6 +8,8 @@ from components.signin import *
 from components.user_dashboard import *
 from components.vendor_dashbord import *
 from pages.main_page import *
+from components.create_ad import *
+from components.edit_stock import *
 
 app.add_static_files("/assets", "assets")
 ui.run()
