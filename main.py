@@ -6,7 +6,7 @@ from components.navbar import *
 from components.signup import *
 from components.signin import *
 from pages.user_dashboard import *
-from components.vendor_dashbord import *
+from pages.vendor_dashboard import *
 from pages.main_page import *
 from components.create_ad import *
 from components.edit_stock import *
