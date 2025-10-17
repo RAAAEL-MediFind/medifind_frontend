@@ -12,4 +12,4 @@ from components.create_ad import *
 from components.edit_stock import *
 
 app.add_static_files("/assets", "assets")
-ui.run()
+ui.run(storage_secret='nanijayblinkz1234@')

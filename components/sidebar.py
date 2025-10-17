@@ -1,10 +1,17 @@
-from nicegui import ui
+from nicegui import ui, app
 
 def show_sidebar():
+    # --- This is the new logout function ---
+    async def logout():
+        """Clears the user's session data and redirects to the sign-in page."""
+        app.storage.user.clear()
+        ui.notify("You have been successfully logged out.", color='positive')
+        ui.navigate.to('/signin')
+
     with ui.left_drawer().classes(
         "bg-white w-64 shadow-xl p-0 flex flex-col h-screen overflow-y-auto"
     ):
-        # Navigation Links Container 
+        # Navigation Links Container
         with ui.element('div').classes("flex flex-col flex-grow px-3 pt-8"):
 
             # Define link data
@@ -22,14 +29,14 @@ def show_sidebar():
                 with ui.row().classes(
                     "items-center gap-4 px-3 py-2 rounded-lg hover:bg-blue-100 "
                     "transition-colors duration-200 cursor-pointer"
-                ).on("click", lambda route=route: ui.open(route)):
+                ).on("click", lambda r=route: ui.navigate.to(r)): # Use ui.navigate.to for SPA-like navigation
                     ui.icon(icon_name).classes("text-blue-600 text-xl")
                     ui.label(label).classes("text-base font-medium text-gray-800")
 
-            # Divider 
+            # Divider
             ui.separator().classes("my-4 border-gray-200")
 
-            # Account Section 
+            # Account Section
             ui.label("ACCOUNT").classes(
                 "text-xs font-semibold text-gray-500 uppercase mt-2 mb-2 px-3"
             )
@@ -38,13 +45,14 @@ def show_sidebar():
             with ui.row().classes(
                 "items-center gap-4 px-3 py-2 rounded-lg hover:bg-blue-100 "
                 "transition-colors duration-200 cursor-pointer"
-            ).on("click", lambda: ui.open("/settings")):
+            ).on("click", lambda: ui.navigate.to("/settings")):
                 ui.icon("settings").classes("text-blue-600 text-xl")
                 ui.label("Settings").classes("text-base font-medium text-gray-800")
 
-            # Logout Button 
+            # --- This is the corrected Logout Button ---
             with ui.row().classes('w-full mt-auto mb-6 px-3'):
-                ui.button("Logout", icon="logout", on_click=lambda: ui.open("/logout")).classes(
+                # The on_click event now calls the new logout function
+                ui.button("Logout", icon="logout", on_click=logout).classes(
                     "w-full bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold "
                     "rounded-xl py-2.5 shadow-md hover:from-red-600 hover:to-red-700 transition-all duration-200"
                 ).props("unelevated")

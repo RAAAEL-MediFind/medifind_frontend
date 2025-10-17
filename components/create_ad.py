@@ -1,18 +1,18 @@
-from nicegui import ui, events, app  # Added app for potential future use
+from nicegui import ui, events, app
 import asyncio
-
-# This variable will hold a reference to the submit button.
-_create_ad_btn: ui.button = None
-
-def handle_flyer_upload(e: events.UploadEventArguments):
-    """
-    Handles the file upload event and displays a notification.
-    """
-    ui.notify(f"File '{e.name}' uploaded successfully!")
+import requests
+from utils.api import base_url # Assuming base_url is in this file
 
 @ui.page("/create_ad")
 def show_create_ad_page():
-    global _create_ad_btn
+    
+    uploaded_file_data = {}
+
+    ### --- PAGE PROTECTION --- ###
+    if app.storage.user.get('role') != 'pharmacy':
+        ui.notify('You must be logged in as a pharmacy to create an ad.', color='negative')
+        ui.navigate.to('/signin')
+        return
 
     # --- Page Styling ---
     ui.add_head_html(
@@ -21,10 +21,10 @@ def show_create_ad_page():
     body {
         margin: 0;
         background:url('/assets/create.jpg') no-repeat center center fixed;
-     background-size: cover;
+        background-size: cover;
         font-family: 'Poppins', sans-serif;
         color: white;
-        overflow: hidden; /* Prevent the main body from scrolling */
+        overflow: hidden;
     }
     </style>"""
     )
@@ -32,7 +32,7 @@ def show_create_ad_page():
     # --- Main Page Layout ---
     with ui.column().classes("w-full items-center"):
         ui.label("MEDIFIND").classes("text-6xl font-bold text-teal-900") \
-    .style('letter-spacing: 0.1em; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);')
+            .style('letter-spacing: 0.1em; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);')
         ui.label("...because the right care shouldn't be hard to find").classes("text-sm font-normal text-black mt-1 tracking-wide").style('letter-spacing: 0.1em; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);')
 
         # --- Form Container ---
@@ -40,75 +40,105 @@ def show_create_ad_page():
             "w-full max-w-2xl mx-auto mt-4 p-8 rounded-2xl shadow-2xl bg-white space-y-6 "
             "max-h-[80vh] overflow-y-auto"
         ):
-            ui.label("CREATE A NEW AD").classes(
+            ui.label("ADD NEW MEDICINE").classes(
                 "font-extrabold text-4xl tracking-wide text-center text-teal-900"
             )
 
-            # --- Input Fields ---
-            title = ui.input("Medication Name").props("outlined").classes("w-full")
-            description = ui.textarea("Description").props("outlined").classes("w-full")
-            price = ui.number("Price").props("outlined").classes("w-full")
+            medicine_name_input = ui.input("Medication Name").props("outlined").classes("w-full")
+            description_input = ui.textarea("Description").props("outlined").classes("w-full")
+            price_input = ui.number("Price").props("outlined").classes("w-full")
+            category_select = ui.select(
+                ["ANALGESICS", "ANTIBIOTICS", "ANTI HYPERTENSIVES", "ANTI DIABETICS", "ANTI VIRAL", "ANTI ULCERS"], 
+                label="Category"
+            ).classes("w-full text-gray-800").props('outlined popup-content-class="text-gray-800"')
+            quantity_input = ui.number("Available Stock (Quantity)").props("outlined").classes("w-full")
 
-            # --- Category Selection ---
-            ui.label("Categories").classes("font-medium text-gray-600")
-            categories = (
-                ui.select(
-                    [
-                        "ANALGESICS", "ANTIBIOTICS", "ANTI HYPERTENSIVES",
-                        "ANTI DIABETICS", "ANTI VIRAL", "ANTI ULCERS",
-                    ]
-                )
-                .classes("w-full text-gray-800")
-                .props('outlined popup-content-class="text-gray-800"')
-            )
-            stock= ui.number("Available Stock").props("outlined").classes("w-full")
-
-            # --- STEP 1: Create a container for the uploader ---
             upload_container = ui.column().classes('w-full gap-0')
-            flyer: ui.upload = None  # Initialize flyer variable
+            
+            async def handle_flyer_upload(e: events.UploadEventArguments):
+                try:
+                    file = e.file
+                    if not file:
+                        ui.notify('No file was uploaded.', color='negative'); return
+                    
+                    content = await file.read()
+                    uploaded_file_data.clear()
+                    uploaded_file_data['name'] = getattr(file, 'name', 'flyer.jpg')
+                    uploaded_file_data['content'] = content
+                    uploaded_file_data['type'] = getattr(file, 'content_type', 'image/jpeg')
+                    
+                    ui.notify(f"Image '{uploaded_file_data['name']}' ready for submission.")
+                except Exception as ex:
+                    ui.notify(f'Could not process file: {ex}', color='negative')
 
-            # --- STEP 2: Create a function to build the uploader ---
             def build_uploader():
-                nonlocal flyer
-                upload_container.clear()  # Clear the container first
+                upload_container.clear()
                 with upload_container:
-                    ui.label("Upload image").classes("font-medium text-gray-600")
-                    flyer = (
-                        ui.upload(on_upload=handle_flyer_upload)
-                        .classes("w-full rounded-lg border border-dashed border-gray-400 p-4")
+                    ui.label("Upload Image (Optional)").classes("font-medium text-gray-600")
+                    ui.upload(on_upload=handle_flyer_upload, auto_upload=True, max_files=1) \
+                        .classes("w-full rounded-lg border border-dashed border-gray-400 p-4") \
                         .props("color=teal")
-                    )
+
+            ### --- INTEGRATION LOGIC (Corrected) --- ###
+            def send_request_sync(url, data, files, headers):
+                try:
+                    # ##### THIS IS THE FIX: Increased timeout to 90 seconds #####
+                    return requests.post(url, data=data, files=files, headers=headers, timeout=90)
+                except requests.RequestException as e:
+                    return e
 
             async def submit():
-                if not title.value:
-                    ui.notify("Please enter a title.", color="negative")
+                token = app.storage.user.get('access_token')
+                if not token:
+                    ui.notify("Your session has expired. Please log in again.", color='negative')
+                    await asyncio.sleep(2)
+                    ui.navigate.to('/signin')
                     return
 
-                _create_ad_btn.props(add="disable loading")
-                await asyncio.sleep(2)
-                _create_ad_btn.props(remove="disable loading")
-                ui.notify(f"Ad '{title.value}' submitted successfully!", color="positive")
+                if not all([medicine_name_input.value, price_input.value, description_input.value, category_select.value, quantity_input.value]):
+                    ui.notify("Please fill all required fields.", color="negative"); return
 
-                # --- Clear the form fields for the next entry ---
-                title.value = ""
-                description.value = ""
-                price.value = None
-                categories.value = None
+                submit_button.disable()
 
-                # --- STEP 3: Rebuild the uploader to completely reset it ---
-                build_uploader()
+                payload_data = {
+                    "medicine_name": medicine_name_input.value,
+                    "quantity": int(quantity_input.value),
+                    "price": price_input.value,
+                    "description": description_input.value,
+                    "category": category_select.value,
+                }
+                
+                files = {}
+                if 'content' in uploaded_file_data:
+                    files['flyer'] = (uploaded_file_data['name'], uploaded_file_data['content'], uploaded_file_data['type'])
 
-            # --- Submit Button ---
-            _create_ad_btn = (
-                ui.button("Submit", on_click=submit)
-                .classes(
-                    "mt-6 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md w-full"
-                ).props("color=teal")
-            )
-            ui.button('Cancel', on_click=lambda: ui.navigate.to('/pharmacydashboard')).classes(
-                    "mt-6 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md w-full"
-                ).props("color=teal")
+                headers = {'Authorization': f'Bearer {token}'}
+                endpoint_url = f"{base_url}/inventory/add"
+
+                ui.notify('Submitting...', spinner=True)
+                response = await asyncio.to_thread(send_request_sync, endpoint_url, payload_data, files, headers)
+
+                if isinstance(response, requests.Response) and response.status_code in [200, 201]:
+                    ui.notify(f"Medicine '{medicine_name_input.value}' added successfully!", color="positive")
+                    medicine_name_input.value = ""
+                    description_input.value = ""
+                    price_input.value = None
+                    category_select.value = None
+                    quantity_input.value = None
+                    uploaded_file_data.clear()
+                    build_uploader()
+                else:
+                    try:
+                        error_detail = response.json().get('detail', 'An unknown error occurred.')
+                    except:
+                        error_detail = response.text if hasattr(response, 'text') else str(response)
+                    ui.notify(f"Submission failed: {error_detail}", color="negative", multi_line=True)
+                
+                submit_button.enable()
+
+            # --- Action Buttons ---
+            with ui.row().classes('w-full gap-4'):
+                submit_button = ui.button("Add Medicine", on_click=submit).classes("flex-grow bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-xl").props("color=teal")
+                ui.button('Cancel', on_click=lambda: ui.navigate.to('/pharmacydashboard'), color='red').classes("flex-grow py-3 rounded-xl")
             
-
-            # Build the uploader for the first time
             build_uploader()

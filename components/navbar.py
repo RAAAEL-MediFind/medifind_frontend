@@ -1,54 +1,50 @@
-from nicegui import ui
-
+from nicegui import ui, app
 
 def show_navbar():
-    with ui.header().classes("bg-[#34989e] text-white p-0 h-8"):
+    
+    async def logout():
+        """Clear the user's session data and redirect to the sign-in page."""
+        app.storage.user.clear()
+        ui.notify("You have been successfully logged out.")
+        ui.navigate.to('/signin')
 
-        with ui.row().classes("w-full bg-[#34989e] items-center p-6"):
+    with ui.header().classes("bg-[#34989e] text-white p-0"):
+        with ui.row().classes("w-full items-center justify-between p-4"):
+            
+            # Left side: Logo and Navigation
+            with ui.row().classes("items-center gap-4"):
+                ui.label("MediFind").classes("text-3xl font-bold")
+                ui.link("Home", target="/").classes("text-white font-semibold p-2 no-underline")
+                ui.link("Shop +", target="/shop").classes("text-white font-semibold p-2 no-underline")
+                ui.link("Contact", target="/contact").classes("text-white font-semibold p-2 no-underline")
 
-            with ui.row().classes("p-2 "):
-                # Replace with an actual image link if you have one
-                ui.label("MediFind").classes("text-4xl font-bold text-white-400")
-
-                ui.link("Home", target="/pharmacy/{name}").classes(
-                    "text-white font-semibold p-2 no-underline ml-20"
-                )
-                ui.link("Shop +", target="/shop").classes(
-                    "text-white font-semibold p-2 no-underline ml-20"
-                )
-
-                ui.link("Contact", target="/contact").classes(
-                    "text-white font-semibold p-2 no-underline ml-20"
-                )
-
-            with ui.row().classes("items-center text-white gap-4 ml-60"):
-                ui.link("SIGN IN ", target="/signin").classes(
-                    "text-white font-semibold no-underline"
-                )
-                ui.link("SIGN UP", target="/signup").classes(
-                    "text-white font-semibold no-underline"
-                )
-                # Wishlist Icon
-                ui.icon("favorite_border", size="md").classes(
-                    "hover:text-red-400 cursor-pointer"
-                )
-
-                # Shopping Cart (with badge)
+            # Right side: Conditional User Actions
+            with ui.row().classes("items-center gap-4"):
+                # Check if the user is logged in
+                if app.storage.user.get('access_token'):
+                    # --- Show these buttons if LOGGED IN ---
+                    
+                    # Determine the dashboard path based on the user's role
+                    role = app.storage.user.get('role')
+                    if role == 'pharmacy':
+                        dashboard_path = '/pharmacydashboard'
+                    else:
+                        dashboard_path = '/userdashboard'
+                    
+                    # Dashboard Button with dynamic navigation
+                    ui.button("Dashboard", on_click=lambda: ui.navigate.to(dashboard_path)).classes(
+                        "bg-blue text-[#34989e] font-bold text-sm px-4 py-1.5 rounded-full shadow-md "
+                        "hover:bg-gray-200 transition-colors duration-200"
+                    )
+                    
+                
+                    
+                else:
+                    # --- Show these links if LOGGED OUT ---
+                    ui.link("SIGN IN", target="/signin").classes("text-white font-semibold no-underline")
+                    ui.link("SIGN UP", target="/signup").classes("text-white font-semibold no-underline")
+                
+                # These icons are always visible
+                ui.icon("favorite_border", size="md").classes("hover:text-red-400 cursor-pointer")
                 with ui.row().classes("items-center"):
                     ui.icon("shopping_cart", size="md").classes("cursor-pointer")
-
-            # --- 3. BOTTOM BAR (Navigation) ---
-            # Using a simple row for the main navigation links
-
-            # Dashboard Button
-            ui.button(
-                "Dashboard", on_click=lambda: ui.navigate("/userdashboard")
-            ).classes(
-                "bg-blue-800 text-white font-semibold text-sm px-4 py-1.5 rounded-full shadow-md "
-                "hover:bg-blue-700 transition-colors duration-200"
-            )
-
-    # Setting the theme color for the rest of the application to match the header
-    ui.add_head_html("<style>body { background-color: white; }</style>")
-
-    # 3. Right: User Actions (Icons and Button)
